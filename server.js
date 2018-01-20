@@ -8,51 +8,23 @@ var bodyParser = require('body-parser');
 
 var mongoose = require('mongoose');
 
-express = require('express'),
-bodyParser = require('body-parser'),
-mongoose = require('mongoose'),
-path = require('path'),
-port = 8000,
-app = express();
+var path = require('path')
+var port = 8000
+
 
 // Set up body-parser to parse form data
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// Set up database connection, Schema, model
-mongoose.connect('mongodb://localhost/quotes_data');
-
-const quoteSchema = new mongoose.Schema({
-name: String,
-quote: String
-});
-
-const Quote = mongoose.model('quotes', quoteSchema);
-
 // Point server to views
 app.set('views', path.join(__dirname, 'views'));
+
 // We're using ejs as our view engine
 app.set('view engine', 'ejs');
 
-// BEGIN ROUTING...
-app.get('/', function(req, res) {
-res.render('index');
-});
+require('./config/mongoose.js');
 
-app.get('/quotes', function(req, res) {
-// grab all quotes and pass into the render view
-Quote.find({}, function(err, quotes) {
-if (err) { console.log(err); }
-res.render('quotes', { quotes: quotes });
-});
-});
-
-app.post('/quotes', function(req, res) {
-Quote.create(req.body, function(err) {
-if (err) { console.log(err); }
-res.redirect('/quotes');
-});
-});
-// END OF ROUTING...
+var routes_setter = require('./config/routes.js')
+routes_setter(app);
 
 app.listen(port, function(){
     console.log("Listening on port 8000...")
